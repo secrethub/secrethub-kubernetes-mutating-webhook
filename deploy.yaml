@@ -23,8 +23,24 @@ spec:
           readOnly: true
       volumes:
       - name: webhook-certs
-        secret:
-          secretName: secrethub-mutating-webhook
+      initContainers:
+        - name: secrethub
+          image: secrethub/cli:0.38.0
+          env:
+            - name: SECRETHUB_CREDENTIAL
+              valueFrom:
+                secretKeyRef:
+                  name: secrethub-mutating-webhook
+                  key: secrethub_credential
+          volumeMounts:
+          - name: webhook-certs
+            mountPath: /webhook-certs
+            readOnly: false
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - "secrethub read kubernetes-webhook/webhook/cert.pem -o /webhook-certs/cert.pem && secrethub read kubernetes-webhook/webhook/key.pem -o /webhook-certs/key.pem"
 ---
 apiVersion: v1
 kind: Service
