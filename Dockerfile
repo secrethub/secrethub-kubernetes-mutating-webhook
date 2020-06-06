@@ -12,7 +12,6 @@ RUN go build -o webhook ./webhook.go
 
 # run stage
 FROM alpine
-RUN apk add ca-certificates && update-ca-certificates
 
 WORKDIR /app
 COPY --from=build /build/webhook /app/webhook
