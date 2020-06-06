@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: secrethub-mutating-webhook
+  labels:
+    app: secrethub-mutating-webhook
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: secrethub-mutating-webhook
+  template:
+    metadata:
+      labels:
+        app: secrethub-mutating-webhook
+    spec:
+      containers:
+      - name: secrethub-mutating-webhook
+        image: simonbarendse/kubernetes-mutating-webhook:latest
+        volumeMounts:
+        - name: webhook-certs
+          mountPath: /etc/webhook/certs
+          readOnly: true
+      volumes:
+      - name: webhook-certs
+        secret:
+          secretName: secrethub-mutating-webhook
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: secrethub-mutating-webhook
+  labels:
+    app: secrethub-mutating-webhook
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 443
+    targetPort: 443
+  selector:
+    app: secrethub-mutating-webhook
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: secrethub-mutating-webhook
+  labels:
+    app: secrethub-mutating-webhook
+    kind: mutator
+webhooks:
+- name: secrethub-mutating-webhook.default.svc.cluster.local
+  clientConfig:
+    service:
+      name: secrethub-mutating-webhook
+      namespace: default
+      path: "/"
+    caBundle: "${CA_BUNDLE}"
+  rules:
+  - operations: ["CREATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]
+  failurePolicy: Fail

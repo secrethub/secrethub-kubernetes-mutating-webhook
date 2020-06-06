@@ -1,8 +1,9 @@
-package webhook
+package main
 
 import (
 	"context"
 	"fmt"
+  "log"
 	"net/http"
 	"os"
 	"strings"
@@ -13,6 +14,12 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func main() {
+  http.HandleFunc("/", webhookHandler().ServeHTTP)
+
+  log.Fatal(http.ListenAndServeTLS(":443", "/etc/webhook/certs/cert.pem", "/etc/webhook/certs/key.pem", nil))
+}
 
 const (
 	// binVolumeName is the name of the volume where the SecretHub CLI binary is stored.
@@ -173,6 +180,3 @@ func webhookHandler() http.Handler {
 	}
 	return whhandler
 }
-
-// F is the exported webhook for the function to bind.
-var F = webhookHandler().ServeHTTP
