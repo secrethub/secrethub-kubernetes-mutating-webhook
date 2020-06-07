@@ -18,16 +18,18 @@ func TestMutate(t *testing.T) {
 		expected corev1.Pod
 		err      error
 	}{
-		"successfuly changing annotated pod": {
+		"one annotated container and version set": {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub": "0.38.0",
+						"secrethub/mutate":  "app",
+						"secrethub/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
+							Name:    "app",
 							Command: []string{"foo"},
 							Env: []corev1.EnvVar{
 								{
@@ -42,12 +44,14 @@ func TestMutate(t *testing.T) {
 			expected: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub": "0.38.0",
+						"secrethub/mutate":  "app",
+						"secrethub/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
 					Containers: []corev1.Container{
 						{
+							Name:    "app",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
 							Env: []corev1.EnvVar{
 								{
@@ -92,6 +96,285 @@ func TestMutate(t *testing.T) {
 				},
 			},
 		},
+		"mutate one of two containers": {
+			input: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate":  "app",
+						"secrethub/version": "0.38.0",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+						},
+						{
+							Name:    "app2",
+							Command: []string{"foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate":  "app",
+						"secrethub/version": "0.38.0",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  true,
+								},
+							},
+						},
+						{
+							Name:    "app2",
+							Command: []string{"foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+						},
+					},
+					InitContainers: []corev1.Container{
+						{
+							Name:            "copy-secrethub-bin",
+							Image:           "secrethub/cli:0.38.0",
+							Command:         []string{"sh", "-c", "cp /usr/bin/secrethub /secrethub/bin/"},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  false,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "secrethub-bin",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{
+									Medium: corev1.StorageMediumMemory,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"mutate two containers": {
+			input: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate":  "app,app2",
+						"secrethub/version": "0.38.0",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+						},
+						{
+							Name:    "app2",
+							Command: []string{"foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate":  "app,app2",
+						"secrethub/version": "0.38.0",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  true,
+								},
+							},
+						},
+						{
+							Name:    "app2",
+							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  true,
+								},
+							},
+						},
+					},
+					InitContainers: []corev1.Container{
+						{
+							Name:            "copy-secrethub-bin",
+							Image:           "secrethub/cli:0.38.0",
+							Command:         []string{"sh", "-c", "cp /usr/bin/secrethub /secrethub/bin/"},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  false,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "secrethub-bin",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{
+									Medium: corev1.StorageMediumMemory,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"default to latest version": {
+			input: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate": "app",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+						},
+					},
+				},
+			},
+			expected: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate": "app",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							Env: []corev1.EnvVar{
+								{
+									Name:  "API_KEY",
+									Value: "secrethub://path/to/api/key",
+								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  true,
+								},
+							},
+						},
+					},
+					InitContainers: []corev1.Container{
+						{
+							Name:            "copy-secrethub-bin",
+							Image:           "secrethub/cli:latest",
+							Command:         []string{"sh", "-c", "cp /usr/bin/secrethub /secrethub/bin/"},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  false,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "secrethub-bin",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{
+									Medium: corev1.StorageMediumMemory,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"ignoring pod without annotation": {
 			input:    corev1.Pod{},
 			expected: corev1.Pod{},
@@ -100,7 +383,7 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub": "0.38.0",
+						"secrethub/mutate": "foo",
 					},
 				},
 				Spec: corev1.PodSpec{
