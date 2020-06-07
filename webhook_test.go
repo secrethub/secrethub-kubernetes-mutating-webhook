@@ -375,6 +375,70 @@ func TestMutate(t *testing.T) {
 				},
 			},
 		},
+		"mutate container without secret references": {
+			input: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate": "app",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"foo"},
+						},
+					},
+				},
+			},
+			expected: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub/mutate": "app",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  true,
+								},
+							},
+						},
+					},
+					InitContainers: []corev1.Container{
+						{
+							Name:            "copy-secrethub-bin",
+							Image:           "secrethub/cli:latest",
+							Command:         []string{"sh", "-c", "cp /usr/bin/secrethub /secrethub/bin/"},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  false,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "secrethub-bin",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{
+									Medium: corev1.StorageMediumMemory,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"ignoring pod without annotation": {
 			input:    corev1.Pod{},
 			expected: corev1.Pod{},

@@ -135,11 +135,6 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 // mutateContainer mutates the given container, updating the volume mounts and
 // command if it contains SecretHub references.
 func (m *SecretHubMutator) mutateContainer(_ context.Context, c *corev1.Container) (*corev1.Container, bool, error) {
-	// Ignore if there are no SecretHub references in the container.
-	if !m.hasSecretHubReferences(c.Env) {
-		return c, false, nil
-	}
-
 	// This webhook only attaches SecretHub when a command is specified in the podspec.
 	//
 	// Note that the command should be defined in the podspec. The ENTRYPOINT or
@@ -155,17 +150,6 @@ func (m *SecretHubMutator) mutateContainer(_ context.Context, c *corev1.Containe
 	c.VolumeMounts = append(c.VolumeMounts, binVolumeMount)
 
 	return c, true, nil
-}
-
-// hasSecretHubReferences parses the environment and returns true if any of the
-// environment variables includes a SecretHub reference.
-func (m *SecretHubMutator) hasSecretHubReferences(env []corev1.EnvVar) bool {
-	for _, e := range env {
-		if strings.HasPrefix(e.Value, "secrethub://") {
-			return true
-		}
-	}
-	return false
 }
 
 // webhookHandler is the http.Handler that responds to webhooks
