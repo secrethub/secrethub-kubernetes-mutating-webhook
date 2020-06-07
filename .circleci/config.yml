@@ -1,0 +1,43 @@
+version: 2.1
+jobs:
+  lint:
+    docker:
+      - image: golangci/golangci-lint:v1.27.0-alpine
+    steps:
+      - checkout
+      - run: golangci-lint run
+  verify-build:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-modules-{{ checksum "go.mod" }}
+      - run: go mod download
+      - save_cache:
+          key: go-modules-{{ checksum "go.mod" }}
+          paths:
+            - /go/pkg/mod
+      - run: go build ./webhook.go
+  test:
+    docker:
+      - image: circleci/golang:1.13
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - go-modules-{{ checksum "go.mod" }}
+      - run: go mod download
+      - save_cache:
+          key: go-modules-{{ checksum "go.mod" }}
+          paths:
+            - /go/pkg/mod
+      - run: go test ./...
+workflows:
+  version: 2
+  pipeline:
+    jobs:
+      - lint
+      - verify-build
+      - test
