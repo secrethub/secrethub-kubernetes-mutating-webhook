@@ -8,4 +8,4 @@ It detects whether the container environment contains secret references (`secret
 1. It mounts the volume to the target container.
 1. It prefixes the target containers command with `<path/to/volume>/secrethub run --`.
 
-This project is based on and heavily inspired by [Berglas' Kubernetes Mutating Webhook](https://github.com/GoogleCloudPlatform/berglas/tree/v0.5.1/examples/kubernetes).
+This project is based on and heavily inspired by [Berglas's Kubernetes Mutating Webhook](https://github.com/GoogleCloudPlatform/berglas/tree/v0.5.1/examples/kubernetes).
