@@ -12,27 +12,5 @@ This project is based on and heavily inspired by [Berglas's Kubernetes Mutating 
 
 ## Deploy the Webhook
 
-The simplest method to deploy the webhook is in a serverless function. Below we outline the steps to take to deploy the webhook to a Google Cloud Function.
+The simplest method to deploy the webhook is in a serverless function. We've outlined the steps to take to [deploy the webhook to a Google Cloud Function](./deploy/gcloud-function/).
 We're also [working on](https://github.com/secrethub/secrethub-kubernetes-mutating-webhook/pull/2) a way to deploy the webhook in the Kubernetes cluster itself.
-
-You can deploy the webhook to a Google cloud function using the following steps:
-
-1. Clone this repository and make it your working directory:
-```sh
-git clone https://github.com/secrethub/secrethub-kubernetes-mutating-webhook.git && cd secrethub-kubernetes-mutating-webhook
-```
-
-2. Deploy the webhook to a Google Cloud Function:
-```sh
-gcloud functions deploy secrethub-mutating-webhook --runtime go113 --entry-point F --trigger-http
-```
-
-3. Set the Google Cloud Function URL in the deploy.yaml:
-```sh
-URL=$(gcloud functions describe secrethub-mutating-webhook --format 'value(httpsTrigger.url)') sed -i "s|YOUR_CLOUD_FUNCTION_URL|$URL|" deploy.yaml
-```
-
-4. Enable the webhook on your Kubernetes cluster:
-```sh
-kubectl apply -f deploy.yaml
-```
