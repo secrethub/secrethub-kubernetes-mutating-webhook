@@ -54,7 +54,7 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 		return false, nil
 	}
 
-	containersStr, enabled := pod.Annotations["secrethub/mutate"]
+	containersStr, enabled := pod.Annotations["secrethub.io/mutate"]
 	if !enabled {
 		m.logger.Debugf("Skipping pod %s because it is not annotated with secrethub", pod.Name)
 		return false, nil
@@ -66,7 +66,7 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 		containers[container] = struct{}{}
 	}
 
-	version, ok := pod.Annotations["secrethub/version"]
+	version, ok := pod.Annotations["secrethub.io/version"]
 	if !ok {
 		version = "latest"
 	}

@@ -22,8 +22,8 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate":  "app",
-						"secrethub/version": "0.38.0",
+						"secrethub.io/mutate":  "app",
+						"secrethub.io/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -44,8 +44,8 @@ func TestMutate(t *testing.T) {
 			expected: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate":  "app",
-						"secrethub/version": "0.38.0",
+						"secrethub.io/mutate":  "app",
+						"secrethub.io/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -100,8 +100,8 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate":  "app",
-						"secrethub/version": "0.38.0",
+						"secrethub.io/mutate":  "app",
+						"secrethub.io/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -132,8 +132,8 @@ func TestMutate(t *testing.T) {
 			expected: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate":  "app",
-						"secrethub/version": "0.38.0",
+						"secrethub.io/mutate":  "app",
+						"secrethub.io/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -198,8 +198,8 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate":  "app,app2",
-						"secrethub/version": "0.38.0",
+						"secrethub.io/mutate":  "app,app2",
+						"secrethub.io/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -230,8 +230,8 @@ func TestMutate(t *testing.T) {
 			expected: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate":  "app,app2",
-						"secrethub/version": "0.38.0",
+						"secrethub.io/mutate":  "app,app2",
+						"secrethub.io/version": "0.38.0",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -303,7 +303,7 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate": "app",
+						"secrethub.io/mutate": "app",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -324,7 +324,7 @@ func TestMutate(t *testing.T) {
 			expected: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate": "app",
+						"secrethub.io/mutate": "app",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -379,7 +379,7 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate": "app",
+						"secrethub.io/mutate": "app",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -394,7 +394,7 @@ func TestMutate(t *testing.T) {
 			expected: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate": "app",
+						"secrethub.io/mutate": "app",
 					},
 				},
 				Spec: corev1.PodSpec{
@@ -447,7 +447,7 @@ func TestMutate(t *testing.T) {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
 					Annotations: map[string]string{
-						"secrethub/mutate": "foo",
+						"secrethub.io/mutate": "foo",
 					},
 				},
 				Spec: corev1.PodSpec{
