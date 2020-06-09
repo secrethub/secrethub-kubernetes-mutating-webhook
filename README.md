@@ -19,7 +19,7 @@ You can deploy the webhook to a Google cloud function using the following steps:
 
 1. Deploy the webhook to a Google Cloud Function:
 ```sh
-gcloud functions deploy secrethub-mutating-webhook --runtime go113 --trigger-http
+gcloud functions deploy secrethub-mutating-webhook --runtime go113 --entry-point F --trigger-http
 ```
 
 2. Set the Google Cloud Function URL in the deploy.yaml:
