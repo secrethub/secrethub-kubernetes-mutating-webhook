@@ -36,7 +36,7 @@ And for every container that is listed in the `secrethub.io/mutate` annotation:
 - The volume is mounted to the container.
 - The command is prefixed with `<path/to/volume>/secrethub run --`.
 
-The version of the SecretHub CLI to use can optionally be configured with `secrethub.io/version`. If it is not set, the `latest` version is used.
+The version of the SecretHub CLI Docker image to be used can optionally be configured with `secrethub.io/version`, e.g. `secrethub.io/version: 0.39.0`. If it is not set, the `latest` version is used. A list of available versions can be found [here](https://hub.docker.com/repository/docker/secrethub/cli/tags).
 
 ## Attributions
 
