@@ -1,5 +1,11 @@
 # SecretHub Kubernetes Mutating Webhook
 
+[![GoDoc](https://godoc.org/github.com/secrethub/secrethub-kubernetes-mutating-webhook?status.svg)](http://godoc.org/github.com/secrethub/secrethub-kubernetes-mutating-webhook)
+[![CircleCI](https://circleci.com/gh/secrethub/secrethub-kubernetes-mutating-webhook.svg?style=shield)](https://circleci.com/gh/secrethub/secrethub-kubernetes-mutating-webhook)
+[![Go Report Card](https://goreportcard.com/badge/github.com/secrethub/secrethub-kubernetes-mutating-webhook)](https://goreportcard.com/report/github.com/secrethub/secrethub-kubernetes-mutating-webhook)
+[![Version]( https://img.shields.io/github/release/secrethub/secrethub-kubernetes-mutating-webhook.svg)](https://github.com/secrethub/secrethub-kubernetes-mutating-webhook/releases/latest)
+[![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord)](https://discord.gg/5M2Fm6T)
+
 This mutating webhook allows you to use secret references (`secrethub://path/to/secret`) in any containers spec, without including SecretHub in the image itself:
 
 ```yaml
