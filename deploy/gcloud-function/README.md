@@ -9,8 +9,9 @@ git clone https://github.com/secrethub/secrethub-kubernetes-mutating-webhook.git
 
 2. Deploy the webhook to a Google Cloud Function:
 ```sh
-gcloud functions deploy secrethub-mutating-webhook --runtime go113 --entry-point F --trigger-http
+gcloud functions deploy secrethub-mutating-webhook --runtime go113 --entry-point F --trigger-http --allow-unauthenticated
 ```
+> The function is configured to allow unauthenticated requests. The function doesn't give access to any resources or data. It only allows you to mutate provided data.
 
 3. Set the Google Cloud Function URL in the deploy.yaml:
 ```sh
