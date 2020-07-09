@@ -149,6 +149,9 @@ func (m *SecretHubMutator) mutateContainer(_ context.Context, c *corev1.Containe
 	// Add the shared volume mount
 	c.VolumeMounts = append(c.VolumeMounts, binVolumeMount)
 
+	// Set app info
+	c.Env = append(c.Env, appInfo...)
+
 	return c, true, nil
 }
 
