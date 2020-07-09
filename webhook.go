@@ -66,9 +66,17 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 		containers[container] = struct{}{}
 	}
 
-	version, ok := pod.Annotations["secrethub.io/version"]
-	if !ok {
-		version = "latest"
+	image := ""
+	imageOverride, ok := pod.Annotations["secrethub.io/imageOverride"]
+	if ok {
+		image = imageOverride
+	} else {
+		version, ok := pod.Annotations["secrethub.io/version"]
+		if !ok {
+			version = "latest"
+		}
+
+		image = "secrethub/cli" + ":" + version
 	}
 
 	mutated := false
@@ -109,7 +117,7 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 	// into a shared volume mount.
 	var binInitContainer = corev1.Container{
 		Name:            "copy-secrethub-bin",
-		Image:           "secrethub/cli" + ":" + version,
+		Image:           image,
 		ImagePullPolicy: corev1.PullIfNotPresent,
 		Command: []string{"sh", "-c",
 			fmt.Sprintf("cp /usr/bin/secrethub %s", binVolumeMountPath)},

@@ -375,6 +375,74 @@ func TestMutate(t *testing.T) {
 				},
 			},
 		},
+		"support image override and ignore version": {
+			input: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub.io/mutate":        "app",
+						"secrethub.io/version":       "123",
+						"secrethub.io/imageOverride": "123456789.dkr.ecr.us-west-2.amazonaws.com/secrethub/cli:latest",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"foo"},
+						},
+					},
+				},
+			},
+			expected: corev1.Pod{
+				ObjectMeta: metav1.ObjectMeta{
+					Annotations: map[string]string{
+						"secrethub.io/mutate":        "app",
+						"secrethub.io/version":       "123",
+						"secrethub.io/imageOverride": "123456789.dkr.ecr.us-west-2.amazonaws.com/secrethub/cli:latest",
+					},
+				},
+				Spec: corev1.PodSpec{
+					Containers: []corev1.Container{
+						{
+							Name:    "app",
+							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  true,
+								},
+							},
+						},
+					},
+					InitContainers: []corev1.Container{
+						{
+							Name:            "copy-secrethub-bin",
+							Image:           "123456789.dkr.ecr.us-west-2.amazonaws.com/secrethub/cli:latest",
+							Command:         []string{"sh", "-c", "cp /usr/bin/secrethub /secrethub/bin/"},
+							ImagePullPolicy: corev1.PullIfNotPresent,
+							VolumeMounts: []corev1.VolumeMount{
+								{
+									Name:      "secrethub-bin",
+									MountPath: "/secrethub/bin/",
+									ReadOnly:  false,
+								},
+							},
+						},
+					},
+					Volumes: []corev1.Volume{
+						{
+							Name: "secrethub-bin",
+							VolumeSource: corev1.VolumeSource{
+								EmptyDir: &corev1.EmptyDirVolumeSource{
+									Medium: corev1.StorageMediumMemory,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"mutate container without secret references": {
 			input: corev1.Pod{
 				ObjectMeta: metav1.ObjectMeta{
