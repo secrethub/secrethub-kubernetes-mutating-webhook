@@ -28,15 +28,20 @@ spec:
 
 You can annotate your pod spec with `secrethub.io/mutate` which expects a comma separated list of the names of the containers to mutate.
 
-When the annotation is found:
-- A volume which will hold the SecretHub CLI is created.
+When the annotation is found, this is what will happen:
+- A volume that will hold the SecretHub CLI is created.
 - An init container which copies the SecretHub CLI into the volume is created.
 
-And for every container that is listed in the `secrethub.io/mutate` annotation:
-- The volume is mounted to the container.
+And for every container you've specified in the `secrethub.io/mutate` annotation:
+- The volume is mounted onto the container.
 - The command is prefixed with `<path/to/volume>/secrethub run --`.
 
-The version of the SecretHub CLI Docker image to be used can optionally be configured with `secrethub.io/version`, e.g. `secrethub.io/version: 0.39.0`. If it is not set, the `latest` version is used. A list of available versions can be found [here](https://hub.docker.com/repository/docker/secrethub/cli/tags).
+The version of the SecretHub CLI Docker image to be used can optionally be configured with `secrethub.io/version`, e.g. `secrethub.io/version: 0.39.0`. If isn't set, the `latest` version is used. A list of available versions can be found [here](https://hub.docker.com/repository/docker/secrethub/cli/tags).
+
+The image that holds the CLI binary to copy is hosted on [DockerHub](https://hub.docker.com/repository/docker/secrethub/cli).
+If you prefer to host your own image to source the binary from, you can use the `secrethub.io/imageOverride` annotation.
+If it's set, the value of `secrethub.io/version` will get ignored.
+Make sure that the image you use has the binary available at `/usr/bin/secrethub`.
 
 ## Attributions
 
