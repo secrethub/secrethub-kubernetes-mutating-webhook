@@ -53,12 +53,12 @@ func TestMutate(t *testing.T) {
 						{
 							Name:    "app",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
-							Env: []corev1.EnvVar{
+							Env: append([]corev1.EnvVar{
 								{
 									Name:  "API_KEY",
 									Value: "secrethub://path/to/api/key",
 								},
-							},
+							}, appInfo...),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "secrethub-bin",
@@ -141,12 +141,12 @@ func TestMutate(t *testing.T) {
 						{
 							Name:    "app",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
-							Env: []corev1.EnvVar{
+							Env: append([]corev1.EnvVar{
 								{
 									Name:  "API_KEY",
 									Value: "secrethub://path/to/api/key",
 								},
-							},
+							}, appInfo...),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "secrethub-bin",
@@ -239,12 +239,12 @@ func TestMutate(t *testing.T) {
 						{
 							Name:    "app",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
-							Env: []corev1.EnvVar{
+							Env: append([]corev1.EnvVar{
 								{
 									Name:  "API_KEY",
 									Value: "secrethub://path/to/api/key",
 								},
-							},
+							}, appInfo...),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "secrethub-bin",
@@ -256,12 +256,12 @@ func TestMutate(t *testing.T) {
 						{
 							Name:    "app2",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
-							Env: []corev1.EnvVar{
+							Env: append([]corev1.EnvVar{
 								{
 									Name:  "API_KEY",
 									Value: "secrethub://path/to/api/key",
 								},
-							},
+							}, appInfo...),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "secrethub-bin",
@@ -332,12 +332,12 @@ func TestMutate(t *testing.T) {
 						{
 							Name:    "app",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
-							Env: []corev1.EnvVar{
+							Env: append([]corev1.EnvVar{
 								{
 									Name:  "API_KEY",
 									Value: "secrethub://path/to/api/key",
 								},
-							},
+							}, appInfo...),
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "secrethub-bin",
@@ -402,6 +402,7 @@ func TestMutate(t *testing.T) {
 						{
 							Name:    "app",
 							Command: []string{"/secrethub/bin/secrethub", "run", "--", "foo"},
+							Env:     appInfo,
 							VolumeMounts: []corev1.VolumeMount{
 								{
 									Name:      "secrethub-bin",
