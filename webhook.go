@@ -155,8 +155,8 @@ func (m *SecretHubMutator) mutateContainer(_ context.Context, c *corev1.Containe
 	return c, true, nil
 }
 
-// webhookHandler is the http.Handler that responds to webhooks
-func webhookHandler() http.Handler {
+// Handler is the http.Handler that responds to webhooks
+func Handler() http.Handler {
 	logger := &kwhlog.Std{Debug: true}
 
 	mutator := &SecretHubMutator{logger: logger}
@@ -183,4 +183,5 @@ func webhookHandler() http.Handler {
 }
 
 // F is the exported webhook for the function to bind.
-var F = webhookHandler().ServeHTTP
+var F = Handler().ServeHTTP
+
