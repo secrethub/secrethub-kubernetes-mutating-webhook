@@ -13,7 +13,7 @@ gcloud functions deploy secrethub-mutating-webhook --runtime go113 --entry-point
 ```
 > The function is configured to allow unauthenticated requests. The function doesn't give access to any resources or data. It only allows you to mutate provided data.
 
-3. Set the Google Cloud Function URL in the deploy.yaml:
+3. Set the Google Cloud Function URL in the `config.yaml`:
 ```sh
 URL=$(gcloud functions describe secrethub-mutating-webhook --format 'value(httpsTrigger.url)') sed -i "s|YOUR_CLOUD_FUNCTION_URL|$URL|" deploy/gcloud-function/config.yaml
 ```
