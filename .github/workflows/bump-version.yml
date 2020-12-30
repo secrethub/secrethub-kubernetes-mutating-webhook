@@ -16,3 +16,22 @@ jobs:
           sed: 's/^\(const version = "\).*\("\)$/\1$VERSION\2/g'
           file: app_info.go
           author_email: bender.github@secrethub.io
+  release-aws:
+    name: Release zip file for lambda deployment
+    runs-on: ubuntu-latest
+    needs: bump-version
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Make zip for AWS-Lambda
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.13'
+        run: go biuld -o webhook-aws cmd/lambda
+        run: zip webhook-aws.zip webhook-aws
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        with:
+        asset_path: ./webhook-aws.zip
+        asset_name: webhook-aws.zip
+        asset_content_type: application/zip
