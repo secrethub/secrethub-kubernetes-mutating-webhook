@@ -23,15 +23,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
       - name: Make zip for AWS-Lambda
         uses: actions/setup-go@v2
         with:
           go-version: '1.13'
-        run: go biuld -o webhook-aws cmd/lambda
-        run: zip webhook-aws.zip webhook-aws
+        run: go biuld -o lambda-webhook cmd/lambda
+        run: zip secrethub-kubernetes-mutating-webhook-${{ env.RELEASE_VERSION }}-lambda.zip lambda-webhook
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         with:
-        asset_path: ./webhook-aws.zip
-        asset_name: webhook-aws.zip
+        asset_path: ./secrethub-kubernetes-mutating-webhook-${{ env.RELEASE_VERSION }}-lambda.zip
+        asset_name: secrethub-kubernetes-mutating-webhook-${{ env.RELEASE_VERSION }}-lambda.zip
         asset_content_type: application/zip
