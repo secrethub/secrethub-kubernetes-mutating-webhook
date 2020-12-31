@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - release/v*
+
 jobs:
   aws-release:
     name: Release zip file for lambda deployment
