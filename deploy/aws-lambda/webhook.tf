@@ -14,7 +14,7 @@ resource "null_resource" "webhook_zip_download" {
   }
 
   provisioner "local-exec" {
-    command = "curl -o lambda-webhook.zip ${local.zip_url}"
+    command = "curl -L -o lambda-webhook.zip ${local.zip_url}"
   }
 
   provisioner "local-exec" {
