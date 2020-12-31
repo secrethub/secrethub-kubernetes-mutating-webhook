@@ -1,27 +1,38 @@
 on:
-  push:
-    branches:
-      - release/v*
+  release:
+    types:
+      - created
 
 jobs:
   aws-release:
-    name: Release zip file for lambda deployment
+    name: Release zip file for Lambda deployment
     runs-on: ubuntu-latest
-    needs: bump-version
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set env
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-      - name: Make zip for AWS-Lambda
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Setup Go bin
         uses: actions/setup-go@v2
         with:
           go-version: '1.13'
-        run: go biuld -o lambda-webhook cmd/lambda
-        run: zip secrethub-kubernetes-mutating-webhook-${{ env.RELEASE_VERSION }}-lambda.zip lambda-webhook
+      - name: Make zip for AWS-Lambda
+        id: aws_lambda_zip
+        run: |
+          go build -o lambda-webhook ./cmd/lambda
+          zip $ZIP_ASSET_NAME lambda-webhook
+        env:
+          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
         with:
-        asset_path: ./secrethub-kubernetes-mutating-webhook-${{ env.RELEASE_VERSION }}-lambda.zip
-        asset_name: secrethub-kubernetes-mutating-webhook-${{ env.RELEASE_VERSION }}-lambda.zip
-        asset_content_type: application/zip
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./${{ env.ZIP_ASSET_NAME }}
+          asset_name: ${{ env.ZIP_ASSET_NAME }}
+          asset_content_type: application/zip
