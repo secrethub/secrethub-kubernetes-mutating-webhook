@@ -15,6 +15,10 @@ jobs:
         uses: bruceadams/get-release@v1.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
+      - name: set environment variables
+        uses: allenevans/set-env@v2.0.0
+        with:
+          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
       - name: Setup Go bin
         uses: actions/setup-go@v2
         with:
@@ -24,9 +28,6 @@ jobs:
         run: |
           go build -o lambda-webhook ./cmd/lambda
           zip $ZIP_ASSET_NAME lambda-webhook
-          echo $ZIP_ASSET_NAME >> $GITHUB_ENV
-        env:
-          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
