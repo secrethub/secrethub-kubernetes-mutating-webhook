@@ -24,13 +24,13 @@ jobs:
         run: |
           go build -o lambda-webhook ./cmd/lambda
           zip $ZIP_ASSET_NAME lambda-webhook
+          echo $ZIP_ASSET_NAME >> $GITHUB_ENV
         env:
           ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
       - name: Upload Release Asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
         with:
           upload_url: ${{ steps.get_release.outputs.upload_url }}
           asset_path: ./${{ env.ZIP_ASSET_NAME }}
