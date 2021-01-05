@@ -1,0 +1,39 @@
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  aws-release:
+    name: Release zip for AWS Lambda
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Set environment variables
+        uses: allenevans/set-env@v2.0.0
+        with:
+          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.13'
+      - name: Make zip for AWS Lambda
+        id: aws_lambda_zip
+        run: |
+          go build -o lambda-webhook ./cmd/lambda
+          zip $ZIP_ASSET_NAME lambda-webhook
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./${{ env.ZIP_ASSET_NAME }}
+          asset_name: ${{ env.ZIP_ASSET_NAME }}
+          asset_content_type: application/zip
