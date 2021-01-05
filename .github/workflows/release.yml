@@ -5,7 +5,7 @@ on:
 
 jobs:
   aws-release:
-    name: Release zip file for Lambda deployment
+    name: Release zip for AWS Lambda
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,20 +15,20 @@ jobs:
         uses: bruceadams/get-release@v1.2.2
         env:
           GITHUB_TOKEN: ${{ github.token }}
-      - name: set environment variables
+      - name: Set environment variables
         uses: allenevans/set-env@v2.0.0
         with:
           ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-lambda.zip
-      - name: Setup Go bin
+      - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: '1.13'
-      - name: Make zip for AWS-Lambda
+      - name: Make zip for AWS Lambda
         id: aws_lambda_zip
         run: |
           go build -o lambda-webhook ./cmd/lambda
           zip $ZIP_ASSET_NAME lambda-webhook
-      - name: Upload Release Asset
+      - name: Upload release asset
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
