@@ -1,10 +1,24 @@
 ## Deploy in a AWS Lambda Function
 
 You can deploy the webhook to a AWS Lambda function in two ways:
-1. by using the provided Terraform module
+1. by using the provided Terraform module (with or without cloning the repository)
+
 2. by manually making the serversless application with AWS Lambda and API Gateway
 
 ### Deploy using the Terraform module
+
+A. Without cloning the repository
+
+1. Add the module to your terraform file:
+```terraform
+module "secrethub_mutating_webhook" {
+  source = "github.com/secrethub/secrethub-kubernetes-mutating-webhook/deploy/aws-lambda"
+}
+```
+
+2. When your file is ready, run `terraform apply` and you will have a functioning webhook with AWS Lambda.
+
+B. With cloning the repository
 
 1. Clone this repository and go to `deploy/aws-lambda` directory:
 ```sh
@@ -42,22 +56,24 @@ aws iam create-role --role-name secrethub-webhook-role --assume-role-policy-docu
 
     a. Make the binary that will be used for the deployment package:
     ```sh
-    go build -o webhook-aws cmd/lambda
+    go build -o lambda-webhook cmd/lambda
     ```
 
     b. Create a deployment package:
     ```sh
-    zip webhook-aws.zip webhook-aws
+    zip lambda-webhook.zip lambda-webhook
     ```
 
-5. Create the Lambda function. Replace `123456789012` in the role ARN with your account ID.
+4. Create the Lambda function. Replace `123456789012` in the role ARN with your account ID.
 ```sh
 aws lambda create-function --function-name secrethub-mutating-webhook \
---zip-file fileb://webhook-aws.zip --handler webhook-aws --runtime go1.x \
+--zip-file fileb://lambda-webhook.zip --handler lambda-webhook --runtime go1.x \
 --role arn:aws:iam::123456789012:role/secrethub-webhook-role
 ```
 
-6. Set up a Lambda proxy integration using API Gateway
+Note your Lambda function ARN. you will need it at a later step.
+
+5. Set up a Lambda proxy integration using API Gateway
 
     a. Create a Rest API:
     ```sh
@@ -81,7 +97,7 @@ aws lambda create-function --function-name secrethub-mutating-webhook \
     ``` 
     Note the resulting `{proxy+}` resource's `id` value. It will be needed for the next step.
 
-    d. Create an `ANY` method request:
+    d. Create an `ANY` method request for the proxy:
     ```sh
     aws apigateway put-method --rest-api-id <your-API-id> \
        --resource-id <your-proxy-resource-id> \
@@ -94,7 +110,25 @@ aws lambda create-function --function-name secrethub-mutating-webhook \
     aws apigateway put-integration \
         --rest-api-id <your-API-id \
         --resource-id <your-proxy-resource-id> \
-        --http-method ANY \
+        --http-method POST \
+        --type AWS_PROXY \
+        --integration-http-method POST \
+        --uri arn:aws:apigateway:<your-region>:lambda:path/2015-03-31/functions/<your-Lambda-function-ARN>/invocations \
+        --credentials arn:aws:iam::123456789012:role/apigAwsProxyRole
+    ```
+
+    f. Now you will need to perfrom the previous 2 steps for the root as well:
+    ```sh
+    aws apigateway put-method --rest-api-id <your-API-id> \
+       --resource-id <your-root-resource-id> \
+       --http-method ANY \
+       --authorization-type "NONE"
+    ```
+    ```sh
+    aws apigateway put-integration \
+        --rest-api-id <your-API-id \
+        --resource-id <your-root-resource-id> \
+        --http-method POST \
         --type AWS_PROXY \
         --integration-http-method POST \
         --uri arn:aws:apigateway:us-east-1:lambda:path/2015-03-31/functions/<your-Lambda-function-ARN>/invocations \
@@ -108,12 +142,12 @@ aws lambda create-function --function-name secrethub-mutating-webhook \
 
 > The function is configured to allow unauthenticated requests. The function doesn't give access to any resources or data. It only allows you to mutate provided data.
 
-7. Set the AWS Lambda Function URL in the `config.yaml`:
+6. Set the AWS Lambda Function URL in the `config.yaml`:
 ```sh
 URL="https://<your-API-id>.execute-api.$(aws configure get default.region).amazonaws.com/v1" sed -i "s|YOUR_AWS_API_GATEWAY_URL|$URL|" deploy/aws-lambda/config.yaml
 ```
 
-8. Enable the webhook on your Kubernetes cluster:
+7. Enable the webhook on your Kubernetes cluster:
 ```sh
 kubectl apply -f deploy/aws-lambda
 ```
