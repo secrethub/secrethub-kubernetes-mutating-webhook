@@ -479,7 +479,7 @@ func TestMutate(t *testing.T) {
 
 			actual := &tc.input
 
-			_, err := mutator.Mutate(context.Background(), actual)
+			_, err := mutator.Mutate(context.Background(), nil, actual)
 
 			if tc.err == nil {
 				assert.Equal(t, actual, tc.expected)
