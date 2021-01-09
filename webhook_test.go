@@ -5,7 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	kwhlog "github.com/slok/kubewebhook/pkg/log"
+	"github.com/sirupsen/logrus"
+	kwhlogrus "github.com/slok/kubewebhook/v2/pkg/log/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -471,7 +472,9 @@ func TestMutate(t *testing.T) {
 
 	for name, tc := range cases {
 		t.Run(name, func(t *testing.T) {
-			logger := &kwhlog.Std{Debug: true}
+			logrusLogEntry := logrus.NewEntry(logrus.New())
+			logrusLogEntry.Logger.SetLevel(logrus.DebugLevel)
+			logger := kwhlogrus.NewLogrus(logrusLogEntry)
 			mutator := &SecretHubMutator{logger: logger}
 
 			actual := &tc.input

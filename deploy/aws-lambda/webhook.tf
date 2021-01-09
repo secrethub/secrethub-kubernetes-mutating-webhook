@@ -114,7 +114,3 @@ resource "aws_api_gateway_deployment" "webhook_deploy" {
   stage_name  = "v1"
 
 }
-
-output "url" {
-  value = aws_api_gateway_deployment.webhook_deploy.invoke_url
-}

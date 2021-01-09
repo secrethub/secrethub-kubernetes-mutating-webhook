@@ -7,9 +7,12 @@ import (
 	"os"
 	"strings"
 
-	kwhhttp "github.com/slok/kubewebhook/pkg/http"
-	kwhlog "github.com/slok/kubewebhook/pkg/log"
-	kwhmutating "github.com/slok/kubewebhook/pkg/webhook/mutating"
+	"github.com/sirupsen/logrus"
+	kwhhttp "github.com/slok/kubewebhook/v2/pkg/http"
+	kwhlog "github.com/slok/kubewebhook/v2/pkg/log"
+	kwhlogrus "github.com/slok/kubewebhook/v2/pkg/log/logrus"
+	kwhmodel "github.com/slok/kubewebhook/v2/pkg/model"
+	kwhmutating "github.com/slok/kubewebhook/v2/pkg/webhook/mutating"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -46,18 +49,18 @@ type SecretHubMutator struct {
 
 // Mutate implements MutateFunc and provides the top-level entrypoint for object
 // mutation.
-func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool, error) {
+func (m *SecretHubMutator) Mutate(ctx context.Context, _ *kwhmodel.AdmissionReview, obj metav1.Object) (*kwhmutating.MutatorResult, error) {
 	m.logger.Infof("calling mutate")
 
 	pod, ok := obj.(*corev1.Pod)
 	if !ok {
-		return false, nil
+		return &kwhmutating.MutatorResult{}, nil
 	}
 
 	containersStr, enabled := pod.Annotations["secrethub.io/mutate"]
 	if !enabled {
 		m.logger.Debugf("Skipping pod %s because it is not annotated with secrethub", pod.Name)
-		return false, nil
+		return &kwhmutating.MutatorResult{}, nil
 	}
 
 	containers := map[string]struct{}{}
@@ -81,7 +84,7 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 
 		c, didMutate, err := m.mutateContainer(ctx, &c)
 		if err != nil {
-			return false, err
+			return &kwhmutating.MutatorResult{}, err
 		}
 		if didMutate {
 			mutated = true
@@ -97,7 +100,7 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 
 		c, didMutate, err := m.mutateContainer(ctx, &c)
 		if err != nil {
-			return false, err
+			return &kwhmutating.MutatorResult{}, err
 		}
 		if didMutate {
 			mutated = true
@@ -129,7 +132,7 @@ func (m *SecretHubMutator) Mutate(ctx context.Context, obj metav1.Object) (bool,
 			pod.Spec.InitContainers...)
 	}
 
-	return false, nil
+	return &kwhmutating.MutatorResult{MutatedObject: obj}, nil
 }
 
 // mutateContainer mutates the given container, updating the volume mounts and
@@ -157,24 +160,28 @@ func (m *SecretHubMutator) mutateContainer(_ context.Context, c *corev1.Containe
 
 // Handler is the http.Handler that responds to webhooks
 func Handler() http.Handler {
-	logger := &kwhlog.Std{Debug: true}
+	logrusLogEntry := logrus.NewEntry(logrus.New())
+	logrusLogEntry.Logger.SetLevel(logrus.DebugLevel)
+	logger := kwhlogrus.NewLogrus(logrusLogEntry)
 
 	mutator := &SecretHubMutator{logger: logger}
 
 	mcfg := kwhmutating.WebhookConfig{
-		Name: "SecretHubMutator",
-		Obj:  &corev1.Pod{},
+		ID:      "SecretHubMutator",
+		Obj:     &corev1.Pod{},
+		Mutator: mutator,
+		Logger:  logger,
 	}
 
 	// Create the wrapping webhook
-	wh, err := kwhmutating.NewWebhook(mcfg, mutator, nil, nil, logger)
+	wh, err := kwhmutating.NewWebhook(mcfg)
 	if err != nil {
 		logger.Errorf("error creating webhook: %s", err)
 		os.Exit(1)
 	}
 
 	// Get the handler for our webhook.
-	whhandler, err := kwhhttp.HandlerFor(wh)
+	whhandler, err := kwhhttp.HandlerFor(kwhhttp.HandlerConfig{Webhook: wh, Logger: logger})
 	if err != nil {
 		logger.Errorf("error creating webhook handler: %s", err)
 		os.Exit(1)
