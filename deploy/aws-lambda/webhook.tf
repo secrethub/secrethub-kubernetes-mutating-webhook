@@ -1,7 +1,8 @@
 data "github_release" "webhook" {
   repository  = "secrethub-kubernetes-mutating-webhook"
   owner       = "secrethub"
-  retrieve_by = "latest"
+  retrieve_by = "tag"
+  release_tag = var.secrethub_mutating_webhook_version
 }
 
 locals {
