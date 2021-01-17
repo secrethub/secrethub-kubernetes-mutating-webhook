@@ -1,24 +1,11 @@
-## Deploy in a Google Cloud Function
+# Deploy to AWS Lambda
 
-You can deploy the webhook to a Google cloud function using the following steps:
+You can deploy the webhook to AWS Lambda and activate it in your Kubernetes cluster by adding the following module to your Terraform project: 
 
-1. Clone this repository and make it your working directory:
-```sh
-git clone https://github.com/secrethub/secrethub-kubernetes-mutating-webhook.git && cd secrethub-kubernetes-mutating-webhook
+```terraform
+module "secrethub_mutating_webhook" {
+  source = "github.com/secrethub/secrethub-kubernetes-mutating-webhook?ref=v0.2.0/deploy/aws-lambda"
+}
 ```
 
-2. Deploy the webhook to a Google Cloud Function:
-```sh
-gcloud functions deploy secrethub-mutating-webhook --runtime go113 --entry-point F --trigger-http --allow-unauthenticated
-```
-> The function is configured to allow unauthenticated requests. The function doesn't give access to any resources or data. It only allows you to mutate provided data.
-
-3. Set the Google Cloud Function URL in the `config.yaml`:
-```sh
-URL=$(gcloud functions describe secrethub-mutating-webhook --format 'value(httpsTrigger.url)') sed -i "s|YOUR_CLOUD_FUNCTION_URL|$URL|" deploy/gcloud-function/config.yaml
-```
-
-4. Enable the webhook on your Kubernetes cluster:
-```sh
-kubectl apply -f deploy/gcloud-function
-```
+This module requires the [Google Cloud provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs) and [Kubernetes provider](https://registry.terraform.io/providers/hashicorp/kubernetes/latest/docs) to be configured in your root project.

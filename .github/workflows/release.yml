@@ -37,3 +37,35 @@ jobs:
           asset_path: ./${{ env.ZIP_ASSET_NAME }}
           asset_name: ${{ env.ZIP_ASSET_NAME }}
           asset_content_type: application/zip
+  gcloud-release:
+    name: Release zip file for Goggle Cloud Function deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Get release
+        id: get_release
+        uses: bruceadams/get-release@v1.2.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: set environment variables
+        uses: allenevans/set-env@v2.0.0
+        with:
+          ZIP_ASSET_NAME: secrethub-kubernetes-mutating-webhook-${{ steps.get_release.outputs.tag_name }}-gcloud.zip
+      - name: Setup Go bin
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.13'
+      - name: Make zip for Google Cloud Function
+        id: gcp_function_zip
+        run: 
+          zip -r $ZIP_ASSET_NAME *
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.get_release.outputs.upload_url }}
+          asset_path: ./${{ env.ZIP_ASSET_NAME }}
+          asset_name: ${{ env.ZIP_ASSET_NAME }}
+          asset_content_type: application/zip
