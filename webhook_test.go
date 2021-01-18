@@ -5,12 +5,11 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/secrethub/secrethub-go/internals/assert"
 	"github.com/sirupsen/logrus"
 	kwhlogrus "github.com/slok/kubewebhook/v2/pkg/log/logrus"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"github.com/secrethub/secrethub-go/internals/assert"
 )
 
 func TestMutate(t *testing.T) {
