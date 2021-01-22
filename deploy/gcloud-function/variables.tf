@@ -1,6 +1,6 @@
 variable "secrethub_mutating_webhook_version" {
-  type    = string
-  default = "v0.2.0"
+  desdescription = "Version of the SecretHub webhook to deploy."
+  default        = "v0.2.0"
 }
 
 variable "deploy_kubernetes_resource" {
