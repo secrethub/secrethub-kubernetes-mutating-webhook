@@ -28,7 +28,6 @@ resource "aws_lambda_function" "webhook" {
   function_name    = "SecretHubWebhook"
   filename         = "lambda-webhook.zip"
   handler          = "lambda-webhook"
-  source_code_hash = filebase64sha256("lambda-webhook.zip")
   role             = aws_iam_role.iam_for_lambda.arn
   runtime          = "go1.x"
   memory_size      = 128
