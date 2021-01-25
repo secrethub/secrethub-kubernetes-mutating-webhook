@@ -25,7 +25,7 @@ resource "null_resource" "webhook_zip_download" {
 }
 
 resource "aws_lambda_function" "webhook" {
-  function_name    = "SecretHubWebhook"
+  function_name    = "SecretHubKubernetesWebhook"
   filename         = "lambda-webhook.zip"
   handler          = "lambda-webhook"
   role             = aws_iam_role.iam_for_lambda.arn
