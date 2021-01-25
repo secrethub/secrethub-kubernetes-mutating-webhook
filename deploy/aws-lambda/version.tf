@@ -1,4 +1,4 @@
-variable "secrethub_mutating_webhook_version" {
+variable "webhook_version" {
   description = "Version of the SecretHub webhook to deploy."
 
   # Default version will get bumped automatically on release PRs,
