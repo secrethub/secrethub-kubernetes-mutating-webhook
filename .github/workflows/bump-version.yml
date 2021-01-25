@@ -10,9 +10,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Bump version
+      - name: Bump version in Go code
         uses: florisvdg/action-version-bump@v0.1.0
         with:
           sed: 's/^\(const version = "\).*\("\)$/\1$VERSION\2/g'
           file: app_info.go
+          author_email: bender.github@secrethub.io
+      - name: Bump version in AWS Lambda README
+        uses: florisvdg/action-version-bump@v0.1.0
+        with:
+          sed: 's/\(source = \(.*\)\?ref=v\).*\("\)$/\1$VERSION\3/g'
+          file: deploy/aws-lambda/README.md
+          author_email: bender.github@secrethub.io
+      - name: Bump version in Terraform variables
+        uses: florisvdg/action-version-bump@v0.1.0
+        with:
+          sed: 's/^\(  default = "\).*\("\)$/\1$VERSION\2/g'
+          file: deploy/aws-lambda/version.tf
           author_email: bender.github@secrethub.io
