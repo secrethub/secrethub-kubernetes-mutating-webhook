@@ -13,7 +13,7 @@ resource "kubernetes_mutating_webhook_configuration" "secrethub" {
     failure_policy            = "Fail"
     side_effects              = "None"
     client_config {
-      url = aws_api_gateway_deployment.webhook_deploy.invoke_url
+      url = aws_api_gateway_deployment.webhook.invoke_url
     }
     rule {
       api_groups   = [""]

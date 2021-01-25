@@ -37,9 +37,9 @@ resource "aws_lambda_function" "webhook" {
 }
 
 resource "aws_iam_role" "iam_for_lambda" {
-  name               = "SecretHubWebhookRole"
+  name               = "SecretHubKubernetesWebhookRole"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
-  description        = "Role for SecretHub Mutating Webhook"
+  description        = "SecretHub Kubernetes Webhook"
 }
 
 data "aws_iam_policy_document" "lambda_assume_role" {
@@ -54,7 +54,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
 }
 
 resource "aws_api_gateway_rest_api" "api" {
-  name = "SecretHubWebhookAPI"
+  name = "SecretHubKubernetesWebhookAPI"
 }
 
 resource "aws_api_gateway_resource" "resource" {
@@ -105,7 +105,7 @@ resource "aws_lambda_permission" "apigw_lambda" {
   source_arn = "${aws_api_gateway_rest_api.api.execution_arn}/*/*"
 }
 
-resource "aws_api_gateway_deployment" "webhook_deploy" {
+resource "aws_api_gateway_deployment" "webhook" {
   depends_on = [
     aws_api_gateway_integration.lambda_integration,
     aws_api_gateway_integration.lambda_root,
