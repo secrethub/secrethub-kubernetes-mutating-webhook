@@ -44,5 +44,8 @@ This project is based on and heavily inspired by [Berglas's Kubernetes Mutating 
 
 ## Deploy the Webhook
 
-The simplest method to deploy the webhook is in a serverless function. We've outlined the steps to take to [deploy the webhook to a Google Cloud Function](./deploy/gcloud-function/).
+The simplest method to deploy the webhook is as a serverless function:
+- [Deploy as an AWS Lambda function using Terraform](./deploy/aws-lambda/)
+- [Deploy as a Google Cloud Function](./deploy/gcloud-function/)
+
 We're also [working on](https://github.com/secrethub/secrethub-kubernetes-mutating-webhook/pull/2) a way to deploy the webhook in the Kubernetes cluster itself.
