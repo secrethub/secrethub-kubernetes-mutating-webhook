@@ -1,6 +1,6 @@
-# Deploy to AWS Lambda
+# Deploy in a Google Cloud Function
 
-You can deploy the webhook to AWS Lambda and activate it in your Kubernetes cluster by adding the following module to your Terraform project: 
+You can deploy the webhook to Google Cloud Function and activate it in your Kubernetes cluster by adding the following module to your Terraform project: 
 
 ```terraform
 module "secrethub_mutating_webhook" {
