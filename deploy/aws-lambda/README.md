@@ -4,7 +4,7 @@ You can deploy the webhook to AWS Lambda and activate it in your Kubernetes clus
 
 ```terraform
 module "secrethub_mutating_webhook" {
-  source = "github.com/secrethub/secrethub-kubernetes-mutating-webhook//deploy/aws-lambda?ref=v0.2.0"
+  source = "github.com/secrethub/secrethub-kubernetes-mutating-webhook//deploy/aws-lambda?ref=v0.3.0"
 }
 ```
 
