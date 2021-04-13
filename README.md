@@ -1,3 +1,9 @@
+<hr/>
+<p align="center">
+  <sub><img src="https://1password.com/img/logo-v1.svg" alt="1Password" width="20" /></sub> <b>SecretHub has joined 1Password!</b> Find out more on the <a href="https://secrethub.io/blog/secrethub-joins-1password/">SecretHub blog</a>. 🎉
+</p>
+<hr/>
+
 # SecretHub Kubernetes Mutating Webhook
 
 [![GoDoc](https://godoc.org/github.com/secrethub/secrethub-kubernetes-mutating-webhook?status.svg)](http://godoc.org/github.com/secrethub/secrethub-kubernetes-mutating-webhook)
