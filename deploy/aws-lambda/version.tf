@@ -4,5 +4,5 @@ variable "webhook_version" {
   # Default version will get bumped automatically on release PRs,
   # so updating the module will also update the webhook version
   # if the module doesn't override the variable.
-  default = "0.3.0"
+  default = "0.3.1"
 }
